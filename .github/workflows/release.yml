@@ -1,0 +1,50 @@
+name: Release Obsidian plugin
+
+# Runs whenever you push a version tag (e.g. `1.0.0`). It builds main.js and
+# publishes a GitHub release with main.js + manifest.json attached as loose
+# assets — the layout BRAT (and the community directory) expects.
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: node test-strip.mjs
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify tag matches manifest version
+        run: |
+          manifest_version=$(grep -oE '"version"\s*:\s*"[^"]+"' manifest.json | grep -oE '[0-9][^"]*')
+          if [ "$manifest_version" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag '${GITHUB_REF_NAME}' does not match manifest version '${manifest_version}'."
+            echo "Obsidian/BRAT require the release tag to equal manifest.json's version (no 'v' prefix)."
+            exit 1
+          fi
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "Release ${GITHUB_REF_NAME}. Install via BRAT or download the assets below." \
+            main.js manifest.json
