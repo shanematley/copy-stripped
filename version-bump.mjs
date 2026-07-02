@@ -20,4 +20,20 @@ const versions = JSON.parse(readFileSync("versions.json", "utf8"));
 versions[targetVersion] = minAppVersion;
 writeFileSync("versions.json", JSON.stringify(versions, null, "\t") + "\n");
 
+// Stamp the changelog: the notes for the upcoming release are written under
+// "## Unreleased"; rename that heading to the actual version so the release
+// workflow can find it by tag name.
+const changelog = readFileSync("CHANGELOG.md", "utf8");
+if (changelog.includes("\n## Unreleased\n")) {
+	writeFileSync(
+		"CHANGELOG.md",
+		changelog.replace("\n## Unreleased\n", `\n## ${targetVersion}\n`),
+	);
+	console.log(`version-bump: stamped CHANGELOG.md "Unreleased" as ${targetVersion}`);
+} else {
+	console.warn(
+		`version-bump: no "## Unreleased" section in CHANGELOG.md — release ${targetVersion} will use fallback notes.`,
+	);
+}
+
 console.log(`version-bump: set manifest to ${targetVersion} (minAppVersion ${minAppVersion})`);

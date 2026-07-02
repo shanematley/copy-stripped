@@ -1,7 +1,8 @@
 # Changelog
 
-Notes under a version heading become the GitHub release notes for that tag.
-Add a `## <version>` section here before running `npm version`.
+Write notes for upcoming changes under `## Unreleased`. When you run
+`npm version`, that heading is stamped with the new version number, and
+the release workflow publishes the section as the GitHub release notes.
 
 ## 1.0.2
 
