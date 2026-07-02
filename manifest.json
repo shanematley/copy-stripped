@@ -1,7 +1,7 @@
 {
 	"id": "copy-stripped",
 	"name": "Copy Stripped",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "1.4.0",
 	"description": "Copy the selection (or whole note) to the clipboard with selected Markdown enrichments stripped out. Configure exactly what gets removed in settings.",
 	"author": "Shane Matley",
