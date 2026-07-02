@@ -40,6 +40,19 @@ jobs:
             exit 1
           fi
 
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          # Pull the body of the "## <version>" section for this tag.
+          awk -v ver="${GITHUB_REF_NAME}" '
+            $0 == "## " ver { found = 1; next }
+            found && /^## /  { exit }
+            found            { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Release ${GITHUB_REF_NAME}. Install via BRAT or download the assets below." > release-notes.md
+          fi
+          cat release-notes.md
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,5 +63,5 @@ jobs:
           fi
           gh release create "${GITHUB_REF_NAME}" \
             --title "${GITHUB_REF_NAME}" \
-            --notes "Release ${GITHUB_REF_NAME}. Install via BRAT or download the assets below." \
+            --notes-file release-notes.md \
             main.js manifest.json
