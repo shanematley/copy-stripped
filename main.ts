@@ -1,6 +1,5 @@
 import {
 	App,
-	Editor,
 	MarkdownView,
 	Notice,
 	Plugin,
@@ -29,17 +28,22 @@ export default class CopyStrippedPlugin extends Plugin {
 					new Notice("Copy Stripped: open a note first");
 					return;
 				}
-				this.copyStripped(view.editor);
+				this.copyStripped(view);
 			},
 		});
 
 		this.addSettingTab(new CopyStrippedSettingTab(this.app, this));
 	}
 
-	async copyStripped(editor: Editor) {
-		// Selection if there is one, otherwise the whole note.
-		const selected = editor.getSelection();
-		const source = selected.length > 0 ? selected : editor.getValue();
+	async copyStripped(view: MarkdownView) {
+		// Selection if there is one, otherwise the whole note. In reading view
+		// the selection lives in the rendered DOM, not the editor — asking the
+		// editor there silently returns "" and we'd copy the whole note.
+		const selected =
+			view.getMode() === "preview"
+				? view.contentEl.win.getSelection()?.toString() ?? ""
+				: view.editor.getSelection();
+		const source = selected.length > 0 ? selected : view.editor.getValue();
 		const result = stripMarkdown(source, this.settings);
 
 		try {
