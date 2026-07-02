@@ -77,3 +77,31 @@ Copy `manifest.json` and `main.js` into:
 
 then enable **Copy Stripped** in *Settings → Community plugins*. During
 development you can symlink the folder instead and use `npm run dev`.
+
+## Releasing
+
+Releases are cut by pushing a version tag; a GitHub Actions workflow
+(`.github/workflows/release.yml`) then builds `main.js` and publishes a
+release with `main.js` + `manifest.json` attached, ready for BRAT.
+
+To publish a new version, run one command:
+
+```bash
+npm version patch   # or: minor / major
+```
+
+This bumps `package.json`, mirrors the version into `manifest.json`, records
+`version -> minAppVersion` in `versions.json` (via `version-bump.mjs`), commits
+those files, tags the commit (no `v` prefix, per `.npmrc`), and pushes the
+commit + tag — which triggers the release workflow.
+
+If a release raises the minimum Obsidian version, edit `minAppVersion` in
+`manifest.json` and commit it *before* running `npm version`, so the new
+`versions.json` entry records the higher requirement.
+
+## Installing via BRAT
+
+Others can install this plugin without the community directory using
+[BRAT](https://github.com/TfTHacker/obsidian42-brat): install and enable BRAT,
+run **"Add beta plugin"**, and enter `shanematley/copy-stripped`. BRAT tracks
+the latest GitHub release and auto-updates.
